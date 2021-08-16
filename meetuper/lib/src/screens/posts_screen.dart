@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:meetuper/src/screens/meetup_detail_screen.dart';
-import 'package:meetuper/src/widget/bottom_navigation.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:meetuper/src/widget/bottom_navigation.dart';
 
 class PostsScreen extends StatefulWidget {
   @override
@@ -22,7 +22,7 @@ class PostsScreenState extends State<PostsScreen> {
   }
 
   @override
-  void initState () {
+  void initState() {
     super.initState();
     _fetchPosts();
   }
@@ -37,24 +37,10 @@ class PostsScreenState extends State<PostsScreen> {
     });
   }
 
-  @override
+  @overridek
   Widget build(BuildContext context) {
-
-    var list = _posts.map((post) {
-      print(post);
-      return ListTile(
-        title: Text(post['title'] ?? '-'),
-        subtitle: Text(post['body'] ?? '-'),
-      );
-
-    }).toList();
-
-    print(list);
-
     return Scaffold(
-        body: ListView(
-          children: list,
-        ),
+        body: _PostList(posts: _posts),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               _increment();
@@ -63,5 +49,31 @@ class PostsScreenState extends State<PostsScreen> {
             child: Icon(Icons.add)),
         bottomNavigationBar: BottomNavigation(),
         appBar: AppBar(title: Text('Posts screen')));
+  }
+}
+
+class _PostList extends StatelessWidget {
+  final List<dynamic> _posts;
+
+  _PostList({required List<dynamic> posts}) : _posts = posts {}
+
+  @override
+  Widget build(BuildContext context) {
+    // var list = _posts.map((post) {
+    //   print(post);
+    //   return ListTile(
+    //     title: Text(post['title'] ?? '-'),
+    //     subtitle: Text(post['body'] ?? '-'),
+    //   );
+    // }).toList();
+
+    return ListView.builder(
+        itemBuilder: (BuildContext context, int i) {
+          return ListTile(
+            title: Text(_posts[i]['title'] ?? '-'),
+            subtitle: Text(_posts[i]['body'] ?? '-'),
+          );
+        },
+        itemCount: _posts.length);
   }
 }
