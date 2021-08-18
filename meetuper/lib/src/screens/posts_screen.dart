@@ -1,8 +1,11 @@
-import 'dart:convert';
-
+import 'package:faker/faker.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:meetuper/src/models/post.dart';
+import 'package:meetuper/src/scoped_model/post_model.dart';
+import 'package:meetuper/src/services/post_api_provider.dart';
+import 'package:meetuper/src/state/app_state.dart';
 import 'package:meetuper/src/widget/bottom_navigation.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class PostsScreen extends StatefulWidget {
   @override
@@ -12,51 +15,46 @@ class PostsScreen extends StatefulWidget {
 }
 
 class PostsScreenState extends State<PostsScreen> {
-  int _counter = 0;
-  List<dynamic> _posts = [];
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModel<PostModel>(
+      model: PostModel(),
+      child: _PostList(),
+    );
 
-  _increment() {
-    setState(() {
-      _counter++;
-    });
+    // return _InheritedPost(
+    //   child: _PostList(),
+    //   posts: _posts,
+    //   createPost: _addPost,
+    // );
+  }
+}
+
+class _InheritedPost extends InheritedWidget {
+  final List<Post> _posts;
+  final Function _createPost;
+
+  const _InheritedPost(
+      {required Widget child,
+      required List<Post> posts,
+      required Function createPost})
+      : _posts = posts,
+        _createPost = createPost,
+        super(child: child);
+
+  static _InheritedPost of(BuildContext context) {
+    final _InheritedPost? result =
+        context.dependOnInheritedWidgetOfExactType<_InheritedPost>();
+    return result!;
   }
 
   @override
-  void initState() {
-    super.initState();
-    _fetchPosts();
-  }
-
-  void _fetchPosts() {
-    var url = Uri.https('jsonplaceholder.typicode.com', '/posts');
-    http.get(url).then((res) {
-      final posts = json.decode(res.body);
-      setState(() {
-        _posts.addAll(posts);
-      });
-    });
-  }
-
-  @overridek
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: _PostList(posts: _posts),
-        floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              _increment();
-            },
-            tooltip: 'Increment Text',
-            child: Icon(Icons.add)),
-        bottomNavigationBar: BottomNavigation(),
-        appBar: AppBar(title: Text('Posts screen')));
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    return true;
   }
 }
 
 class _PostList extends StatelessWidget {
-  final List<dynamic> _posts;
-
-  _PostList({required List<dynamic> posts}) : _posts = posts {}
-
   @override
   Widget build(BuildContext context) {
     // var list = _posts.map((post) {
@@ -67,13 +65,45 @@ class _PostList extends StatelessWidget {
     //   );
     // }).toList();
 
-    return ListView.builder(
-        itemBuilder: (BuildContext context, int i) {
-          return ListTile(
-            title: Text(_posts[i]['title'] ?? '-'),
-            subtitle: Text(_posts[i]['body'] ?? '-'),
-          );
+    // final testingData = AppStore.of(context).testingData;
+    // final _posts = _InheritedPost.of(context)._posts;
+    return ScopedModelDescendant<PostModel>(builder: (context, _, model) {
+      final posts = model.posts;
+      return Scaffold(
+          body: ListView.builder(
+              itemBuilder: (BuildContext context, int i) {
+                if (i.isOdd) return Divider();
+
+                final index = i ~/ 2;
+
+                return ListTile(
+                  title: Text(posts[index].title),
+                  subtitle: Text(posts[index].body),
+                );
+              },
+              itemCount: posts.length * 2),
+          floatingActionButton: _PostButton(),
+          bottomNavigationBar: BottomNavigation(),
+          appBar: AppBar(title: Text('Posts')));
+    });
+  }
+}
+
+class _PostButton extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+
+    final postModel = ScopedModel.of<PostModel>(context, rebuildOnChange: true);
+
+
+    // final createPost = _InheritedPost.of(context)._createPost;
+    return FloatingActionButton(
+        onPressed: () {
+          postModel.addPost();
+          // createPost();
         },
-        itemCount: _posts.length);
+        tooltip: 'Increment Text',
+        child: Icon(Icons.add));
   }
 }
