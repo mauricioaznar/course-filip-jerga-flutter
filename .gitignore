@@ -17,6 +17,7 @@
 
 /meetuper/server/node_modules
 /meetuper/server/config/dev.js
+/meetuper/build
 
 
 
