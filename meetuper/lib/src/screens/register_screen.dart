@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meetuper/src/models/arguments.dart';
 import 'package:meetuper/src/models/forms.dart';
+import 'package:meetuper/src/screens/login_screen.dart';
+import 'package:meetuper/src/screens/meetup_home_screen.dart';
 import 'package:meetuper/src/services/auth_api_service.dart';
 import 'package:meetuper/src/utils/validator.dart';
 
@@ -24,6 +27,8 @@ class RegisterScreenState extends State<RegisterScreen> {
 
   RegisterFormData _registerFormData = RegisterFormData();
 
+  BuildContext? _buildContext;
+
   // 4. Create Register function and print all of the data
 
   _submit() {
@@ -42,15 +47,15 @@ class RegisterScreenState extends State<RegisterScreen> {
 
   _register() {
     print(_registerFormData.toJSON());
-    widget._authApiService
-        .register(_registerFormData)
-        .then((isValid) {if (isValid) {
-          print('asdfa');
-    } else {
-          print('error');
-    }})
-        .catchError((e) {
-          print(e);
+    widget._authApiService.register(_registerFormData).then((isValid) {
+      if (isValid) {
+        Navigator.pushReplacementNamed(context, LoginScreen.route,
+            arguments: LoginScreenArguments(
+                "You have been successfully register. Feel free to login now"));
+      }
+    }).catchError((res) {
+      final snackBar = SnackBar(content: Text(res['errors']['message']));
+      ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
     });
   }
 
@@ -59,6 +64,7 @@ class RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
         appBar: AppBar(title: Text('Register')),
         body: Builder(builder: (context) {
+          _buildContext = context;
           return Padding(
               padding: EdgeInsets.all(20.0),
               child: Form(
@@ -178,7 +184,8 @@ class RegisterScreenState extends State<RegisterScreen> {
         children: <Widget>[
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, "/login");
+              Navigator.pushNamed(context, LoginScreen.route,
+                  arguments: LoginScreenArguments('Login from register'));
             },
             child: Text(
               'Already Registered? Login Now.',
@@ -189,7 +196,7 @@ class RegisterScreenState extends State<RegisterScreen> {
           ),
           GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, "/meetups");
+                Navigator.pushNamed(context, MeetupHomeScreen.route);
               },
               child: Text(
                 'Continue to Home Page',

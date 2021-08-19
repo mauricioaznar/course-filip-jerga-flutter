@@ -7,8 +7,11 @@ import 'package:meetuper/src/services/auth_api_service.dart';
 import 'package:meetuper/src/utils/validator.dart';
 
 class LoginScreen extends StatefulWidget {
+  final String? _message;
   static final String route = '/login';
   final AuthApiService authApi = AuthApiService();
+
+  LoginScreen({String? message}) : _message = message;
 
   @override
   State<StatefulWidget> createState() {
@@ -32,6 +35,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   final username = 'filip@gmail.com';
   final password = 'testtest';
+
 
   _submit() {
     final form = _formKey.currentState;
@@ -59,6 +63,12 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (widget._message != null && widget._message!.isNotEmpty) {
+        final snackBar = SnackBar(content: Text(widget._message!));
+        ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
+      }
+    });
     // _emailController.addListener(() {
     //   print(_emailController.text);
     // });

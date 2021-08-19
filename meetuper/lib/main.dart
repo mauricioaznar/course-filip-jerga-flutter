@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/models/arguments.dart';
 import 'package:meetuper/src/screens/login_screen.dart';
 import 'package:meetuper/src/screens/meetup_detail_screen.dart';
 import 'package:meetuper/src/screens/meetup_home_screen.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
         // home: CounterHomeScreen(title: 'Navigator'),
         home: RegisterScreen(),
         onGenerateRoute: (RouteSettings settings) {
+          print('${settings.name}');
           if (settings.name == MeetupDetailScreen.route) {
             final MeetupDetailArguments arguments =
                 settings.arguments as MeetupDetailArguments;
@@ -30,9 +32,11 @@ class MyApp extends StatelessWidget {
                 builder: (context) =>
                     RegisterScreen());
           } else if (settings.name == LoginScreen.route) {
+            final LoginScreenArguments? arguments = settings.arguments as LoginScreenArguments?;
+            final message = arguments?.message;
             return MaterialPageRoute(
                 builder: (context) =>
-                    LoginScreen());
+                    LoginScreen(message: message));
           } else if (settings.name == MeetupHomeScreen.route) {
             return MaterialPageRoute(
                 builder: (context) =>

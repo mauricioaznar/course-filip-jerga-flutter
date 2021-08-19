@@ -25,7 +25,6 @@ class AuthApiService {
   User? get authUser => _authUser;
 
   Future<String?> getToken() async {
-    print('asdfasdfasd');
     if (_token != null) {
       return _token;
     } else {
@@ -101,7 +100,7 @@ class AuthApiService {
         authUser = User.fromJSON(parsedData);
         return parsedData;
       } else {
-        // todo improve error handling
+        print(parsedData);
         throw parsedData;
       }
     } catch (e) {
@@ -123,7 +122,7 @@ class AuthApiService {
       } else {
         // todo improve error handling
         print(parsedData);
-        return false;
+        throw parsedData;
       }
     } catch (e) {
       // todo improve error handling
