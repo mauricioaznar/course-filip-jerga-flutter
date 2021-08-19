@@ -31,6 +31,7 @@ dependencies:
   http: ^0.13.3
   faker: ^2.0.0
   scoped_model: ^2.0.0-nullsafety.0
+  shared_preferences: ^2.0.6
 
 dev_dependencies:
   flutter_test:

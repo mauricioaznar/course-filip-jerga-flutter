@@ -49,11 +49,10 @@ class LoginScreenState extends State<LoginScreen> {
 
   void _login() {
     widget.authApi.login(_loginFormData).then((data) {
+      Navigator.pushReplacementNamed(context, MeetupHomeScreen.route);
     }).catchError((res) {
-      print(res['']);
-      print('nvnvnv');
-      // Scaffold.of(_buildContext!)
-      //     .showSnackBar(SnackBar(content: res['errors']['message']));
+      final snackBar = SnackBar(content: Text(res['errors']['message']));
+      ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
     });
   }
 
@@ -122,6 +121,7 @@ class LoginScreenState extends State<LoginScreen> {
                           decoration: InputDecoration(
                             hintText: 'Password',
                           ),
+                          obscureText: true,
                           validator: composeValidators('email', [
                             requiredValidator,
                             minLengthValidator,
