@@ -110,6 +110,27 @@ class AuthApiService {
     }
   }
 
+  Future<bool> register(RegisterFormData registerFormData) async {
+    try {
+      final body = json.encode(registerFormData.toJSON());
+      final url = Uri.http('10.0.2.2:3001', '/api/v1/users/register');
+      final res = await http.post(url, body: body, headers: {
+        "Content-Type": "application/json"
+      });
+      final parsedData = Map<String, dynamic>.from(json.decode(res.body));
+      if (res.statusCode == 200) {
+        return true;
+      } else {
+        // todo improve error handling
+        print(parsedData);
+        return false;
+      }
+    } catch (e) {
+      // todo improve error handling
+      throw e;
+    }
+  }
+
   // android emulator: 10.0.2.2 https://stackoverflow.com/questions/55785581/socketexception-os-error-connection-refused-errno-111-in-flutter-using-djan
 
   fetchMeetups() async {
