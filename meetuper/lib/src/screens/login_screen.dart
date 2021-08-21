@@ -58,7 +58,7 @@ class LoginScreenState extends State<LoginScreen> {
     _authBloc.dispatch(InitLogging());
     widget.authApi.login(_loginFormData).then((data) {
       _authBloc.dispatch(LoggedIn());
-      // Navigator.pushReplacementNamed(context, MeetupHomeScreen.route);
+      Navigator.pushReplacementNamed(context, '/');
     }).catchError((res) {
       final snackBar = SnackBar(content: Text(res['errors']['message']));
       ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);

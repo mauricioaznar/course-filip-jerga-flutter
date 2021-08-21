@@ -37,18 +37,18 @@ class MeetuperApp extends StatefulWidget {
 }
 
 class _MeetuperAppState extends State<MeetuperApp> {
-  AuthBloc? authBloc;
+  late AuthBloc authBloc;
 
   @override
   void initState() {
     authBloc = BlocProvider.of<AuthBloc>(context);
-    authBloc!.dispatch(AppStarted());
+    authBloc.dispatch(AppStarted());
     super.initState();
   }
 
   _buildStream() {
     return StreamBuilder<AuthenticationState>(
-        stream: authBloc!.authStream,
+        stream: authBloc.authStream,
         initialData: AuthenticationUninitialized(),
         builder: (BuildContext context,
             AsyncSnapshot<AuthenticationState> snapshot) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:meetuper/src/blocs/auth_bloc/events.dart';
 import 'package:meetuper/src/blocs/auth_bloc/state.dart';
 import 'package:meetuper/src/blocs/bloc_provider.dart';
@@ -10,8 +11,8 @@ export 'package:meetuper/src/blocs/auth_bloc/state.dart';
 
 class AuthBloc extends BlocBase {
   final AuthApiService authApiService;
-  final StreamController<AuthenticationState> _authController =
-      StreamController<AuthenticationState>();
+  final BehaviorSubject<AuthenticationState> _authController =
+      BehaviorSubject<AuthenticationState>();
 
   AuthBloc({required this.authApiService}) : assert(authApiService != null);
 
