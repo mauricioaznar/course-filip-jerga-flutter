@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/blocs/auth_bloc/auth_bloc.dart';
 import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/blocs/meetup_bloc.dart';
 import 'package:meetuper/src/models/meetup.dart';
@@ -30,6 +31,8 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
     CustomText(key: UniqueKey(), name: 'asdfasd')
   ];
 
+  late AuthBloc authBloc;
+
   List<Meetup> _meetups = [];
 
   _shuffleList() {
@@ -41,11 +44,17 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
     final meetupBloc = BlocProvider.of<MeetupBloc>(context);
+    authBloc = BlocProvider.of<AuthBloc>(context);
+    print(authBloc);
     meetupBloc.fetchMeetups();
-    meetupBloc.meetups.listen((data) {
-      print(data);
-    });
+    meetupBloc.meetups.listen((data) {});
+
+    super.initState();
   }
 
   @override
@@ -55,7 +64,7 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [_MeetupTitle(), _MeetupList()])),
+                children: [_MeetupTitle(authBloc: authBloc), _MeetupList()])),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () {
@@ -68,6 +77,9 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
 
 class _MeetupTitle extends StatelessWidget {
   final AuthApiService _apiService = AuthApiService();
+  final AuthBloc _authBloc;
+
+  _MeetupTitle({required AuthBloc authBloc}) : _authBloc = authBloc;
 
   _buildWelcomeTitle() {
     return FutureBuilder<bool>(
@@ -94,8 +106,8 @@ class _MeetupTitle extends StatelessWidget {
                       onTap: () {
                         _apiService.logout().then((val) {
                           if (val == true) {
-                            Navigator.pushReplacementNamed(
-                                context, LoginScreen.route);
+                            _authBloc.dispatch(LoggedOut());
+                            Navigator.pushReplacementNamed(context, '/');
                           }
                         });
                       },

@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/blocs/auth_bloc/auth_bloc.dart';
+import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/models/forms.dart';
 import 'package:meetuper/src/screens/meetup_home_screen.dart';
 import 'package:meetuper/src/screens/register_screen.dart';
@@ -26,6 +28,8 @@ class LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormFieldState<String>> _emailKey =
       GlobalKey<FormFieldState<String>>();
 
+  late AuthBloc _authBloc;
+
   LoginFormData _loginFormData = LoginFormData();
 
   BuildContext? _buildContext;
@@ -35,7 +39,6 @@ class LoginScreenState extends State<LoginScreen> {
 
   final username = 'filip@gmail.com';
   final password = 'testtest';
-
 
   _submit() {
     final form = _formKey.currentState;
@@ -52,23 +55,27 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
+    _authBloc.dispatch(InitLogging());
     widget.authApi.login(_loginFormData).then((data) {
-      Navigator.pushReplacementNamed(context, MeetupHomeScreen.route);
+      _authBloc.dispatch(LoggedIn());
+      // Navigator.pushReplacementNamed(context, MeetupHomeScreen.route);
     }).catchError((res) {
       final snackBar = SnackBar(content: Text(res['errors']['message']));
       ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
+      _authBloc.dispatch(LoggedOut());
     });
   }
 
   @override
   void initState() {
-    super.initState();
+    _authBloc = BlocProvider.of(context);
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       if (widget._message != null && widget._message!.isNotEmpty) {
         final snackBar = SnackBar(content: Text(widget._message!));
         ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
       }
     });
+    super.initState();
     // _emailController.addListener(() {
     //   print(_emailController.text);
     // });

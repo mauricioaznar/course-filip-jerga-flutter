@@ -10,39 +10,80 @@ import 'package:meetuper/src/screens/login_screen.dart';
 import 'package:meetuper/src/screens/meetup_detail_screen.dart';
 import 'package:meetuper/src/screens/meetup_home_screen.dart';
 import 'package:meetuper/src/screens/register_screen.dart';
+import 'package:meetuper/src/services/auth_api_service.dart';
 
 void main() {
   // return runApp(AppStore(child: MyApp()));
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
-    runApp(MeetuperApp());
+    runApp(App());
   });
 }
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>(child: MeetuperApp(), bloc: AuthBloc());
+    return BlocProvider<AuthBloc>(
+        child: MeetuperApp(), bloc: AuthBloc(authApiService: AuthApiService()));
   }
 }
 
 class MeetuperApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _MeetuperAppState();
   }
 }
 
 class _MeetuperAppState extends State<MeetuperApp> {
-  // This widget is the root of your application.
+  AuthBloc? authBloc;
+
+  @override
+  void initState() {
+    authBloc = BlocProvider.of<AuthBloc>(context);
+    authBloc!.dispatch(AppStarted());
+    super.initState();
+  }
+
+  _buildStream() {
+    return StreamBuilder<AuthenticationState>(
+        stream: authBloc!.authStream,
+        initialData: AuthenticationUninitialized(),
+        builder: (BuildContext context,
+            AsyncSnapshot<AuthenticationState> snapshot) {
+          final state = snapshot.data;
+          print(state);
+          if (state is AuthenticationUninitialized) {
+            return SplashScreen();
+          }
+
+          if (state is AuthenticationAuthenticated) {
+            //
+            return BlocProvider<MeetupBloc>(
+              bloc: MeetupBloc(),
+              child: MeetupHomeScreen(),
+            );
+          }
+
+          if (state is AuthenticationUnauthenticated) {
+            return LoginScreen();
+          }
+
+          if (state is AuthenticationLoading) {
+            return LoadingScreen();
+          }
+
+          return Container();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'My',
         theme: ThemeData(primarySwatch: Colors.purple),
-        home: LoginScreen(),
+        home: _buildStream(),
         // home: CounterHomeScreen(title: 'Navigator'),
         // home: BlocProvider<CounterBloc>(
         //     bloc: CounterBloc(), child: CounterHomeScreen(title: 'Title')),
@@ -74,5 +115,23 @@ class _MeetuperAppState extends State<MeetuperApp> {
         //   MeetupDetailScreen.route: (context) => MeetupDetailScreen()
         // },
         );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Splash Screen')),
+    );
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 
+Type _typeOf<T>() => T;
+
 abstract class BlocBase {
   void dispose();
 }
@@ -22,9 +24,10 @@ class BlocProvider<T extends BlocBase> extends StatefulWidget {
   }
 
   static T of<T extends BlocBase>(BuildContext context) {
-    _BlocProviderInherited<T> provider =
-        (context.findAncestorWidgetOfExactType<_BlocProviderInherited<T>>()
-            as _BlocProviderInherited<T>);
+    _BlocProviderInherited<T> provider = (context
+        .getElementForInheritedWidgetOfExactType<_BlocProviderInherited<T>>()
+        ?.widget as _BlocProviderInherited<T>);
+
     return provider.bloc;
   }
 }

@@ -49,7 +49,7 @@ class RegisterScreenState extends State<RegisterScreen> {
     print(_registerFormData.toJSON());
     widget._authApiService.register(_registerFormData).then((isValid) {
       if (isValid) {
-        Navigator.pushReplacementNamed(context, LoginScreen.route,
+        Navigator.pushReplacementNamed(context, '/',
             arguments: LoginScreenArguments(
                 "You have been successfully register. Feel free to login now"));
       }
