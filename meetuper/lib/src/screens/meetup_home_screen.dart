@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/blocs/bloc_provider.dart';
+import 'package:meetuper/src/blocs/meetup_bloc.dart';
 import 'package:meetuper/src/models/meetup.dart';
 import 'package:meetuper/src/screens/login_screen.dart';
 import 'package:meetuper/src/services/auth_api_service.dart';
@@ -14,7 +16,6 @@ class MeetupDetailArguments {
 
 class MeetupHomeScreen extends StatefulWidget {
   static final String route = '/meetupHome';
-  final MeetupApiService _api = MeetupApiService();
 
   @override
   State<StatefulWidget> createState() {
@@ -38,15 +39,12 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _fetchMeetups();
-  }
-
-  _fetchMeetups() async {
-    var meetups = await widget._api.fetchMeetups();
-    setState(() {
-      _meetups = meetups;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final meetupBloc = BlocProvider.of<MeetupBloc>(context);
+    meetupBloc.fetchMeetups();
+    meetupBloc.meetups.listen((data) {
+      print(data);
     });
   }
 
@@ -57,12 +55,7 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              _MeetupTitle(),
-              _MeetupList(
-                meetups: _meetups,
-              )
-            ])),
+                children: [_MeetupTitle(), _MeetupList()])),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () {
@@ -101,7 +94,8 @@ class _MeetupTitle extends StatelessWidget {
                       onTap: () {
                         _apiService.logout().then((val) {
                           if (val == true) {
-                            Navigator.pushReplacementNamed(context, LoginScreen.route);
+                            Navigator.pushReplacementNamed(
+                                context, LoginScreen.route);
                           }
                         });
                       },
@@ -166,21 +160,29 @@ class _MeetupCard extends StatelessWidget {
 }
 
 class _MeetupList extends StatelessWidget {
-  List<Meetup> _meetups;
-
-  _MeetupList({required List<Meetup> meetups}) : _meetups = meetups;
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-        itemCount: _meetups.length * 2,
-        itemBuilder: (BuildContext context, int i) {
-          if (i.isOdd) return Divider();
-          final index = i ~/ 2;
-          return _MeetupCard(meetup: _meetups[index]);
-        },
-      ),
+      child: StreamBuilder<List<Meetup>>(
+          stream: BlocProvider.of<MeetupBloc>(context).meetups,
+          initialData: [],
+          builder:
+              (BuildContext context, AsyncSnapshot<List<Meetup>> snapshot) {
+            final meetups = snapshot.data;
+            final length = meetups?.length ?? 0;
+            return ListView.builder(
+              itemCount: (length) * 2,
+              itemBuilder: (BuildContext context, int i) {
+                if (i.isOdd) return Divider();
+                final index = i ~/ 2;
+
+                final meetup = meetups != null
+                    ? _MeetupCard(meetup: meetups[index])
+                    : Container();
+                return meetup;
+              },
+            );
+          }),
     );
   }
 }

@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/blocs/counter_bloc.dart';
 import 'package:meetuper/src/screens/meetup_detail_screen.dart';
 import 'package:meetuper/src/widget/bottom_navigation.dart';
 
 class StreamHomeScreen extends StatefulWidget {
   final String _title;
-  final CounterBloc bloc;
 
-  StreamHomeScreen({required this.bloc, required String title})
-      : _title = title;
+  StreamHomeScreen({required String title}) : _title = title;
 
   @override
   State<StatefulWidget> createState() {
@@ -19,10 +18,13 @@ class StreamHomeScreen extends StatefulWidget {
 }
 
 class StreamHomeScreenState extends State<StreamHomeScreen> {
+  CounterBloc? counterBloc;
+
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
+
+    counterBloc = BlocProvider.of<CounterBloc>(context);
   }
 
   // use broadcast when getting subscribed in multiple places
@@ -58,7 +60,7 @@ class StreamHomeScreenState extends State<StreamHomeScreen> {
   // }
 
   _increment() {
-    widget.bloc.increment(1);
+    counterBloc!.increment(1);
   }
 
   @override
@@ -73,11 +75,11 @@ class StreamHomeScreenState extends State<StreamHomeScreen> {
                   textDirection: TextDirection.ltr,
                   style: TextStyle(fontSize: 15.0)),
               StreamBuilder(
-                  stream: widget.bloc.counterStream,
+                  stream: counterBloc!.counterStream,
                   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
                     // hasData will be false when initialData is not defined
                     if (snapshot.hasData) {
-                      return Text('Counter ${widget.bloc.counter}',
+                      return Text('Counter ${counterBloc!.counter}',
                           textDirection: TextDirection.ltr,
                           style: TextStyle(fontSize: 30.0));
                     } else {
@@ -88,13 +90,13 @@ class StreamHomeScreenState extends State<StreamHomeScreen> {
                   }),
               RaisedButton(
                   child: StreamBuilder(
-                      stream: widget.bloc.counterStream,
-                      initialData: widget.bloc.counter,
+                      stream: counterBloc!.counterStream,
+                      initialData: counterBloc!.counter,
                       builder:
                           (BuildContext context, AsyncSnapshot<int> snapshot) {
                         // hasData will be false when initialData is not defined
                         if (snapshot.hasData) {
-                          return Text('Counter ${widget.bloc.counter}',
+                          return Text('Counter ${counterBloc!.counter}',
                               textDirection: TextDirection.ltr,
                               style: TextStyle(fontSize: 30.0));
                         } else {

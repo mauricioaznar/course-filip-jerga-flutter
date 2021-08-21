@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:meetuper/src/blocs/bloc_provider.dart';
+import 'package:meetuper/src/blocs/meetup_bloc.dart';
 import 'package:meetuper/src/models/meetup.dart';
 import 'package:meetuper/src/services/meetup_api_service.dart';
 import 'package:meetuper/src/widget/bottom_navigation.dart';
@@ -19,55 +21,44 @@ class MeetupDetailScreen extends StatefulWidget {
 }
 
 class MeetupDetailScreenState extends State<MeetupDetailScreen> {
-  Meetup? _meetup;
-
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _fetchMeetupApi();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    BlocProvider.of<MeetupBloc>(context).fetchMeetup(widget.meetupId);
   }
 
-  _fetchMeetupApi() async {
-    Meetup meetup = await widget.api.fetchMeetupById(widget.meetupId);
-    print(meetup.description);
-    setState(() {
-      _meetup = meetup;
-    });
-  }
-
-  _buildBody() {
-    print(_meetup);
-    if (_meetup != null) {
-      return ListView(
-        children: [
-          HeaderSection(meetup: _meetup!),
-          TitleSection(meetup: _meetup!),
-          AdditionalInfoSection(meetup: _meetup!),
-          Padding(
-            padding: EdgeInsets.all(20),
-            child:     Align(
-              alignment: Alignment.centerLeft,
-              child: Text(_meetup!.description +
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."),
-            ),
-          )
-        ],
-      );
-    } else {
-      return Container(
-        width: 0,
-        height: 0,
-      );
-    }
+  _buildBody(Meetup _meetup) {
+    return ListView(
+      children: [
+        HeaderSection(meetup: _meetup),
+        TitleSection(meetup: _meetup),
+        AdditionalInfoSection(meetup: _meetup),
+        Padding(
+          padding: EdgeInsets.all(20),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(_meetup.description +
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."),
+          ),
+        )
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final meetupId = widget.meetupId;
-    // TODO: implement build
     return Scaffold(
-      body: Center(child: _buildBody()),
+      body: StreamBuilder(
+        stream: BlocProvider.of<MeetupBloc>(context).meetup,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            return Center(child: _buildBody(snapshot.data));
+          } else {
+            return Container();
+          }
+        },
+      ),
       appBar: AppBar(
         title: Text('Meetup detail'),
       ),

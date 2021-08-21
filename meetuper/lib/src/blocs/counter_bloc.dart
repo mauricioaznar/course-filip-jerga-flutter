@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:meetuper/src/blocs/bloc_provider.dart';
 
-class CounterBloc {
+class CounterBloc extends BlocBase {
   final StreamController<int> _streamController =
       StreamController<int>.broadcast();
   final StreamController<int> _counterController =
