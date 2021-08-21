@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meetuper/src/blocs/auth_bloc/auth_bloc.dart';
 import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/blocs/counter_bloc.dart';
 import 'package:meetuper/src/blocs/meetup_bloc.dart';
@@ -15,11 +16,26 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
-    runApp(MyApp());
+    runApp(MeetuperApp());
   });
 }
 
-class MyApp extends StatelessWidget {
+class App extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<AuthBloc>(child: MeetuperApp(), bloc: AuthBloc());
+  }
+}
+
+class MeetuperApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _MeetuperAppState();
+  }
+}
+
+class _MeetuperAppState extends State<MeetuperApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
