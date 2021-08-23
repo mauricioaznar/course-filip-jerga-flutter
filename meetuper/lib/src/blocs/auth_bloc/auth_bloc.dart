@@ -12,12 +12,12 @@ export 'package:meetuper/src/blocs/auth_bloc/state.dart';
 class AuthBloc extends BlocBase {
   final AuthApiService authApiService;
 
-  final StreamController<AuthenticationState> _authController =
-      StreamController<AuthenticationState>.broadcast();
+  final BehaviorSubject<AuthenticationState> _authController =
+      BehaviorSubject<AuthenticationState>();
   Stream<AuthenticationState> get authStream => _authController.stream;
   StreamSink<AuthenticationState> get authSink => _authController.sink;
 
-  AuthBloc({required this.authApiService}) : assert(authApiService != null);
+  AuthBloc({required this.authApiService}) : assert(authApiService != null) {}
 
   void dispatch(AuthenticationEvent event) async {
     await for (var state in _authStream(event)) {

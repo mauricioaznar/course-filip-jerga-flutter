@@ -34,18 +34,28 @@ class MeetuperApp extends StatefulWidget {
 
 class _MeetuperAppState extends State<MeetuperApp> {
   late AuthBloc authBloc;
+  int i = 0;
 
   @override
   void initState() {
     authBloc = BlocProvider.of<AuthBloc>(context);
     authBloc.dispatch(AppStarted());
+    authBloc.authStream.listen((event) {
+      print(i);
+    });
+    print('getting called again');
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    authBloc.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My',
       theme: ThemeData(primarySwatch: Colors.purple),
       home: StreamBuilder<AuthenticationState>(
           stream: authBloc.authStream,
@@ -70,7 +80,7 @@ class _MeetuperAppState extends State<MeetuperApp> {
               String message = '';
               if (settings.arguments != null) {
                 final arguments = settings.arguments as LoginScreenArguments;
-                message = arguments.message ?? state.message ?? '';
+                message = arguments.message ?? state.message;
                 state.message = '';
               }
 
@@ -83,38 +93,38 @@ class _MeetuperAppState extends State<MeetuperApp> {
 
             return Container();
           }),
-      // onGenerateRoute: (RouteSettings settings) {
-      //   if (settings.name == MeetupDetailScreen.route) {
-      //     final MeetupDetailArguments arguments =
-      //         settings.arguments as MeetupDetailArguments;
-      //     return MaterialPageRoute(
-      //         builder: (context) => BlocProvider<MeetupBloc>(
-      //             child: BlocProvider<UserBloc>(
-      //               bloc: UserBloc(auth: AuthApiService()),
-      //               child: MeetupDetailScreen(meetupId: arguments.id),
-      //             ),
-      //             bloc: MeetupBloc()));
-      //   } else if (settings.name == RegisterScreen.route) {
-      //     return MaterialPageRoute(builder: (context) => RegisterScreen());
-      //   } else if (settings.name == LoginScreen.route) {
-      //     final LoginScreenArguments? arguments =
-      //         settings.arguments as LoginScreenArguments?;
-      //     return MaterialPageRoute(
-      //         builder: (context) =>
-      //             LoginScreen(message: 'Login from onGenerateRoute'));
-      //   } else if (settings.name == MeetupHomeScreen.route) {
-      //     return MaterialPageRoute(
-      //         builder: (context) => BlocProvider<MeetupBloc>(
-      //             child: MeetupHomeScreen(), bloc: MeetupBloc()));
-      //   }
-      // },
-      // routes: {
-      //   MeetupHomeScreen.route: (context) => BlocProvider<MeetupBloc>(
-      //         bloc: MeetupBloc(),
-      //         child: MeetupHomeScreen(),
-      //       ),
-      //   RegisterScreen.route: (context) => RegisterScreen(),
-      // },
+      onGenerateRoute: (RouteSettings settings) {
+        if (settings.name == MeetupDetailScreen.route) {
+          final MeetupDetailArguments arguments =
+              settings.arguments as MeetupDetailArguments;
+          return MaterialPageRoute(
+              builder: (context) => BlocProvider<MeetupBloc>(
+                  child: BlocProvider<UserBloc>(
+                    bloc: UserBloc(auth: AuthApiService()),
+                    child: MeetupDetailScreen(meetupId: arguments.id),
+                  ),
+                  bloc: MeetupBloc()));
+        } else if (settings.name == RegisterScreen.route) {
+          return MaterialPageRoute(builder: (context) => RegisterScreen());
+        } else if (settings.name == LoginScreen.route) {
+          final LoginScreenArguments? arguments =
+              settings.arguments as LoginScreenArguments?;
+          return MaterialPageRoute(
+              builder: (context) =>
+                  LoginScreen(message: 'Login from onGenerateRoute'));
+        } else if (settings.name == MeetupHomeScreen.route) {
+          return MaterialPageRoute(
+              builder: (context) => BlocProvider<MeetupBloc>(
+                  child: MeetupHomeScreen(), bloc: MeetupBloc()));
+        }
+      },
+      routes: {
+        MeetupHomeScreen.route: (context) => BlocProvider<MeetupBloc>(
+              bloc: MeetupBloc(),
+              child: MeetupHomeScreen(),
+            ),
+        RegisterScreen.route: (context) => RegisterScreen(),
+      },
     );
   }
 }

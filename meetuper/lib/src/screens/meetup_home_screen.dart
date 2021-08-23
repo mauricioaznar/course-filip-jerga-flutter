@@ -5,9 +5,7 @@ import 'package:meetuper/src/blocs/auth_bloc/auth_bloc.dart';
 import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/blocs/meetup_bloc.dart';
 import 'package:meetuper/src/models/meetup.dart';
-import 'package:meetuper/src/screens/login_screen.dart';
 import 'package:meetuper/src/services/auth_api_service.dart';
-import 'package:meetuper/src/services/meetup_api_service.dart';
 
 class MeetupDetailArguments {
   final String id;
@@ -42,6 +40,11 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
@@ -50,7 +53,9 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
   void initState() {
     final meetupBloc = BlocProvider.of<MeetupBloc>(context);
     authBloc = BlocProvider.of<AuthBloc>(context);
-    print(authBloc);
+    authBloc.authStream.listen((event) {
+      print('MEET_HOME $event');
+    });
     meetupBloc.fetchMeetups();
     meetupBloc.meetups.listen((data) {});
 
@@ -68,6 +73,8 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () {
+            authBloc.dispatch(LoggedOut(message: 'message'));
+            Navigator.pushReplacementNamed(context, '/');
             // _shuffleList();
           },
         ),
