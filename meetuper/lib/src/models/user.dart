@@ -10,9 +10,10 @@ class User {
   User.fromJSON(Map<String, dynamic> parsedJson)
       : this.id = parsedJson['_id'],
         this.name = parsedJson['name'],
-        this.username = parsedJson['username'],
-        this.email = parsedJson['email'],
+        this.username = parsedJson['username'] ?? '',
+        this.email = parsedJson['email'] ?? '',
         this.info = parsedJson['info'] ?? '',
         this.avatar = parsedJson['avatar'] ?? '',
-        this.joinedMeetups = parsedJson['joinedMeetups']?.cast<String>() ?? [];
+        this.joinedMeetups =
+            parsedJson['joinedMeetups']?.cast<String>() ?? [] {}
 }

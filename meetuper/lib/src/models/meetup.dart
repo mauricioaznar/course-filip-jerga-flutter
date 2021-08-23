@@ -1,4 +1,5 @@
 import 'package:meetuper/src/models/category.dart';
+import 'package:meetuper/src/models/user.dart';
 
 class Meetup {
   final String id;
@@ -16,8 +17,8 @@ class Meetup {
   final String updatedAt;
   int joinedPeopleCount;
 
-  // final User meetupCreator;
-  // final List<User> joinedPeople;
+  final User meetupCreator;
+  final List<User> joinedPeople;
 
   Meetup.fromJSON(Map<String, dynamic> parsedJson)
       : this.id = parsedJson['_id'],
@@ -33,7 +34,12 @@ class Meetup {
         this.joinedPeopleCount = parsedJson['joinedPeopleCount'] ?? 0,
         this.createdAt = parsedJson['createdAt'] ?? '',
         this.updatedAt = parsedJson['updatedAt'] ?? '',
-        this.category = Category.fromJSON(parsedJson['category']);
-// this.meetupCreator =
-// this.joinedPeople =
+        this.category = Category.fromJSON(parsedJson['category']),
+        this.meetupCreator = User.fromJSON(parsedJson['meetupCreator']),
+        this.joinedPeople = parsedJson['joinedPeople']
+                .map<User>((json) => User.fromJSON(json))
+                .toList() ??
+            [] {
+    print(parsedJson['meetupCreator']);
+  }
 }

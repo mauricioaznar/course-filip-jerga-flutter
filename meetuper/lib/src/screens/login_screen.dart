@@ -37,9 +37,6 @@ class LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _autovalidate = false;
 
-  final username = 'filip@gmail.com';
-  final password = 'testtest';
-
   _submit() {
     final form = _formKey.currentState;
     if (form != null && form.validate()) {
@@ -58,17 +55,16 @@ class LoginScreenState extends State<LoginScreen> {
     _authBloc.dispatch(InitLogging());
     widget.authApi.login(_loginFormData).then((data) {
       _authBloc.dispatch(LoggedIn());
-      Navigator.pushReplacementNamed(context, '/');
     }).catchError((res) {
+      _authBloc.dispatch(LoggedOut(message: res['errors']['message']));
       final snackBar = SnackBar(content: Text(res['errors']['message']));
       ScaffoldMessenger.of(_buildContext!).showSnackBar(snackBar);
-      _authBloc.dispatch(LoggedOut());
     });
   }
 
   @override
   void initState() {
-    _authBloc = BlocProvider.of(context);
+    _authBloc = BlocProvider.of<AuthBloc>(context);
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       if (widget._message != null && widget._message!.isNotEmpty) {
         final snackBar = SnackBar(content: Text(widget._message!));
@@ -117,6 +113,7 @@ class LoginScreenState extends State<LoginScreen> {
                       ),
                       TextFormField(
                           key: _emailKey,
+                          initialValue: 'filip@gmail.co',
                           style: Theme.of(context).textTheme.headline6,
                           onSaved: (String? value) {
                             if (value != null) _loginFormData.email = value;
@@ -131,6 +128,7 @@ class LoginScreenState extends State<LoginScreen> {
                           ])),
                       TextFormField(
                           key: _passwordKey,
+                          initialValue: 'testtest',
                           style: Theme.of(context).textTheme.headline6,
                           onSaved: (String? value) {
                             if (value != null) _loginFormData.password = value;

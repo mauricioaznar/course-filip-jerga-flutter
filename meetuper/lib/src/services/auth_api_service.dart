@@ -9,7 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthApiService {
   static final AuthApiService _singleton = AuthApiService._internal();
-  String?  _token ;
+  String? _token;
+
   User? _authUser;
 
   factory AuthApiService() {
@@ -34,6 +35,15 @@ class AuthApiService {
     }
   }
 
+  Future<Map<String, dynamic>?> _decodedtoken() async {
+    final token = await this.getToken();
+
+    if (token != null) {
+      final decodedToken = decode(token);
+      return decodedToken;
+    }
+    return null;
+  }
 
   Future<bool> _persistToken(token) async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -41,8 +51,7 @@ class AuthApiService {
     return prefs.setString('token', token);
   }
 
-
-  Future<bool> _saveToken (String? token) async {
+  Future<bool> _saveToken(String? token) async {
     if (token != null) {
       await _persistToken(token);
       _token = token;
@@ -51,21 +60,17 @@ class AuthApiService {
     return false;
   }
 
+  void initUserFromToken() async {
+    final decodedToken = await _decodedtoken();
+    if (decodedToken != null) {
+      authUser = User.fromJSON(decodedToken);
+    }
+  }
 
-  Future<bool> isAuthenticated () async {
-    final token = await this.getToken();
-    if (token != null) {
-
-      final decodedToken = decode(token);
-
-
-      final isValidToken = decodedToken['exp'] * 1000 > DateTime.now().millisecond;
-
-      if (isValidToken) {
-        authUser = User.fromJSON(decodedToken);
-      }
-
-      return isValidToken;
+  Future<bool> isAuthenticated() async {
+    final decodedToken = await _decodedtoken();
+    if (decodedToken != null) {
+      return decodedToken['exp'] * 1000 > DateTime.now().millisecond;
     }
 
     return false;
@@ -76,31 +81,48 @@ class AuthApiService {
     final SharedPreferences prefs = await _prefs;
     _token = null;
     _authUser = null;
-    return await prefs.remove('token');
+    await prefs.remove('token');
   }
 
-  Future<bool> logout () async {
-      try {
-        return await _removeAuthData();
-      } catch(e) {
-        return false;
+  Future<bool> logout() async {
+    try {
+      await _removeAuthData();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<User?> fetchAuthUser() async {
+    try {
+      final token = await this.getToken();
+      if (token != null) {
+        final url = Uri.http('10.0.2.2:3001', '/api/v1/users/me');
+        final res =
+            await http.post(url, headers: {'Authorization': 'Bearer $token'});
+        final decodedBody = Map<String, dynamic>.from(json.decode(res.body));
+        await _saveToken(decodedBody['token']);
+        authUser = User.fromJSON(decodedBody);
+        return authUser;
       }
+    } catch (e) {
+      _removeAuthData();
+      throw Exception('Canoot fetch user');
+    }
   }
 
   Future<dynamic> login(LoginFormData loginFormData) async {
     try {
       final body = json.encode(loginFormData.toJSON());
       final url = Uri.http('10.0.2.2:3001', '/api/v1/users/login');
-      final res = await http.post(url, body: body, headers: {
-        "Content-Type": "application/json"
-      });
+      final res = await http
+          .post(url, body: body, headers: {"Content-Type": "application/json"});
       final parsedData = Map<String, dynamic>.from(json.decode(res.body));
       if (res.statusCode == 200) {
         _saveToken(parsedData['token']);
         authUser = User.fromJSON(parsedData);
         return parsedData;
       } else {
-        print(parsedData);
         throw parsedData;
       }
     } catch (e) {
@@ -113,9 +135,8 @@ class AuthApiService {
     try {
       final body = json.encode(registerFormData.toJSON());
       final url = Uri.http('10.0.2.2:3001', '/api/v1/users/register');
-      final res = await http.post(url, body: body, headers: {
-        "Content-Type": "application/json"
-      });
+      final res = await http
+          .post(url, body: body, headers: {"Content-Type": "application/json"});
       final parsedData = Map<String, dynamic>.from(json.decode(res.body));
       if (res.statusCode == 200) {
         return true;
@@ -128,21 +149,5 @@ class AuthApiService {
       // todo improve error handling
       throw e;
     }
-  }
-
-  // android emulator: 10.0.2.2 https://stackoverflow.com/questions/55785581/socketexception-os-error-connection-refused-errno-111-in-flutter-using-djan
-
-  fetchMeetups() async {
-    final url = Uri.http('10.0.2.2:3001', '/api/v1/meetups');
-    final res = await http.get(url);
-    final List parsedMeetups = json.decode(res.body);
-    return parsedMeetups.map((val) => Meetup.fromJSON(val)).toList();
-  }
-
-  Future<Meetup> fetchMeetupById (String id) async {
-    final url = Uri.http('10.0.2.2:3001', '/api/v1/meetups/$id');
-    final res = await http.get(url);
-    final parsedMeetup = json.decode(res.body);
-    return Meetup.fromJSON(parsedMeetup);
   }
 }

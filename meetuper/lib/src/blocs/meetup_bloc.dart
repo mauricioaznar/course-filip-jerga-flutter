@@ -1,16 +1,19 @@
 import 'dart:async';
 
 import 'package:meetuper/src/models/meetup.dart';
+import 'package:meetuper/src/models/user.dart';
+import 'package:meetuper/src/services/auth_api_service.dart';
 import 'package:meetuper/src/services/meetup_api_service.dart';
 
 import 'bloc_provider.dart';
 
 class MeetupBloc implements BlocBase {
+  //  better idea would be to inject service in constructor
   final MeetupApiService _apiService = MeetupApiService();
+  final AuthApiService authApiService = AuthApiService();
 
   final StreamController<List<Meetup>> _meetupController =
       StreamController.broadcast();
-
   Stream<List<Meetup>> get meetups {
     return _meetupController.stream;
   }
@@ -21,7 +24,6 @@ class MeetupBloc implements BlocBase {
 
   final StreamController<Meetup> _meetupDetailController =
       StreamController.broadcast();
-
   Stream<Meetup> get meetup {
     return _meetupDetailController.stream;
   }
@@ -40,7 +42,30 @@ class MeetupBloc implements BlocBase {
     _inMeetup.add(meetup);
   }
 
+  void joinMeetup(Meetup meetup) {
+    _apiService.joinMeetup(meetup.id).then((_) {
+      User user = authApiService.authUser!;
+      user.joinedMeetups.add(meetup.id);
+      meetup.joinedPeople.add(user);
+      meetup.joinedPeopleCount++;
+      _inMeetup.add(meetup);
+    }).catchError((err) => print(err));
+  }
+
+  void leaveMeetup(Meetup meetup) {
+    _apiService.leaveMeetup(meetup.id).then((_) {
+      User user = authApiService.authUser!;
+      user.joinedMeetups.removeWhere((jMeetup) {
+        return jMeetup == meetup.id;
+      });
+      meetup.joinedPeople.removeWhere((jUser) => jUser.id == user.id);
+      meetup.joinedPeopleCount--;
+      _inMeetup.add(meetup);
+    }).catchError((err) => print(err));
+  }
+
   void dispose() {
     _meetupController.close();
+    _meetupDetailController.close();
   }
 }

@@ -11,14 +11,13 @@ export 'package:meetuper/src/blocs/auth_bloc/state.dart';
 
 class AuthBloc extends BlocBase {
   final AuthApiService authApiService;
-  final BehaviorSubject<AuthenticationState> _authController =
-      BehaviorSubject<AuthenticationState>();
+
+  final StreamController<AuthenticationState> _authController =
+      StreamController<AuthenticationState>.broadcast();
+  Stream<AuthenticationState> get authStream => _authController.stream;
+  StreamSink<AuthenticationState> get authSink => _authController.sink;
 
   AuthBloc({required this.authApiService}) : assert(authApiService != null);
-
-  Stream<AuthenticationState> get authStream => _authController.stream;
-
-  StreamSink<AuthenticationState> get authSink => _authController.sink;
 
   void dispatch(AuthenticationEvent event) async {
     await for (var state in _authStream(event)) {
@@ -28,13 +27,15 @@ class AuthBloc extends BlocBase {
 
   Stream<AuthenticationState> _authStream(AuthenticationEvent event) async* {
     if (event is AppStarted) {
-      // todo check if user is authenticated
       final bool isAuth = await authApiService.isAuthenticated();
 
       if (isAuth) {
+        await authApiService.fetchAuthUser().catchError((_) {
+          dispatch(LoggedOut(message: 'Error'));
+        });
         yield AuthenticationAuthenticated();
       } else {
-        yield AuthenticationUnauthenticated();
+        yield AuthenticationUnauthenticated(message: 'Logout');
       }
     }
 
@@ -47,12 +48,12 @@ class AuthBloc extends BlocBase {
     }
 
     if (event is LoggedOut) {
-      yield AuthenticationUnauthenticated();
+      yield AuthenticationUnauthenticated(logout: true, message: event.message);
     }
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _authController.close();
   }
 }
