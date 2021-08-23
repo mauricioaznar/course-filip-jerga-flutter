@@ -83,19 +83,19 @@ class _PostList extends StatelessWidget {
               },
               itemCount: posts.length * 2),
           floatingActionButton: _PostButton(),
-          bottomNavigationBar: BottomNavigation(),
+          bottomNavigationBar: BottomNavigation(
+            currentIndex: 0,
+            onChange: (int i) {},
+          ),
           appBar: AppBar(title: Text('Posts')));
     });
   }
 }
 
 class _PostButton extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-
     final postModel = ScopedModel.of<PostModel>(context, rebuildOnChange: true);
-
 
     // final createPost = _InheritedPost.of(context)._createPost;
     return FloatingActionButton(

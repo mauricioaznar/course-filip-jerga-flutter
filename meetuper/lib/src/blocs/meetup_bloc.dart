@@ -4,6 +4,7 @@ import 'package:meetuper/src/models/meetup.dart';
 import 'package:meetuper/src/models/user.dart';
 import 'package:meetuper/src/services/auth_api_service.dart';
 import 'package:meetuper/src/services/meetup_api_service.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'bloc_provider.dart';
 
@@ -12,8 +13,7 @@ class MeetupBloc implements BlocBase {
   final MeetupApiService _apiService = MeetupApiService();
   final AuthApiService authApiService = AuthApiService();
 
-  final StreamController<List<Meetup>> _meetupController =
-      StreamController.broadcast();
+  final BehaviorSubject<List<Meetup>> _meetupController = BehaviorSubject();
   Stream<List<Meetup>> get meetups {
     return _meetupController.stream;
   }
@@ -22,8 +22,7 @@ class MeetupBloc implements BlocBase {
     return _meetupController.sink;
   }
 
-  final StreamController<Meetup> _meetupDetailController =
-      StreamController.broadcast();
+  final BehaviorSubject<Meetup> _meetupDetailController = BehaviorSubject();
   Stream<Meetup> get meetup {
     return _meetupDetailController.stream;
   }

@@ -9,6 +9,8 @@ import 'package:meetuper/src/services/auth_api_service.dart';
 import 'package:meetuper/src/services/meetup_api_service.dart';
 import 'package:meetuper/src/widget/bottom_navigation.dart';
 
+enum Views { DetailView, threadView, peopleView }
+
 class MeetupDetailScreen extends StatefulWidget {
   static final String route = '/meetupDetail';
   final MeetupApiService api = MeetupApiService();
@@ -27,6 +29,7 @@ class MeetupDetailScreenState extends State<MeetupDetailScreen> {
   late MeetupBloc _meetupBloc;
   late UserBloc _userBloc;
   late Meetup _meetup;
+  int screenIndex = 0;
 
   @override
   void initState() {
@@ -47,6 +50,10 @@ class MeetupDetailScreenState extends State<MeetupDetailScreen> {
 
   _leaveMeetup() {
     _meetupBloc.leaveMeetup(_meetup);
+  }
+
+  bool _isActiveView(Views view) {
+    return view.index == screenIndex;
   }
 
   _buildBody(Meetup _meetup) {
@@ -78,12 +85,24 @@ class MeetupDetailScreenState extends State<MeetupDetailScreen> {
           final userState = userStateSnapshot.data!;
 
           return Scaffold(
-            body: StreamBuilder(
-              stream: _meetupBloc.meetup,
-              builder: (BuildContext context, AsyncSnapshot meetupSnapshot) {
-                print(meetupSnapshot.data);
-                if (meetupSnapshot.hasData) {
-                  return Center(child: _buildBody(meetupSnapshot.data));
+            body: Builder(
+              builder: (BuildContext bContext) {
+                if (_isActiveView(Views.DetailView)) {
+                  return StreamBuilder(
+                    stream: _meetupBloc.meetup,
+                    builder:
+                        (BuildContext context, AsyncSnapshot meetupSnapshot) {
+                      if (meetupSnapshot.hasData) {
+                        return Center(child: _buildBody(meetupSnapshot.data));
+                      } else {
+                        return Container();
+                      }
+                    },
+                  );
+                } else if (_isActiveView(Views.threadView)) {
+                  return Container();
+                } else if (_isActiveView(Views.peopleView)) {
+                  return Container();
                 } else {
                   return Container();
                 }
@@ -92,7 +111,14 @@ class MeetupDetailScreenState extends State<MeetupDetailScreen> {
             appBar: AppBar(
               title: Text('Meetup detail'),
             ),
-            bottomNavigationBar: BottomNavigation(),
+            bottomNavigationBar: BottomNavigation(
+                currentIndex: screenIndex,
+                userState: userState,
+                onChange: (int index) {
+                  setState(() {
+                    screenIndex = index;
+                  });
+                }),
             floatingActionButton: JoinMeetupActionButton(
                 userState: userState,
                 joinMeetup: _joinMeetup,

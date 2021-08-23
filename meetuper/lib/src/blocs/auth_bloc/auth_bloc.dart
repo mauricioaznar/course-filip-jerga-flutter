@@ -13,9 +13,15 @@ class AuthBloc extends BlocBase {
   final AuthApiService authApiService;
 
   final BehaviorSubject<AuthenticationState> _authController =
-      BehaviorSubject<AuthenticationState>();
-  Stream<AuthenticationState> get authStream => _authController.stream;
-  StreamSink<AuthenticationState> get authSink => _authController.sink;
+      BehaviorSubject();
+
+  Stream<AuthenticationState> get authStream {
+    return _authController.stream;
+  }
+
+  StreamSink<AuthenticationState> get authSink {
+    return _authController.sink;
+  }
 
   AuthBloc({required this.authApiService}) : assert(authApiService != null) {}
 

@@ -36,9 +36,11 @@ class CounterHomeScreenState extends State<CounterHomeScreen> {
               Text('Counter $_counter',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(fontSize: 30.0)),
-              RaisedButton(child: Text('Go to detail'), onPressed: () {
-                Navigator.pushNamed(context, MeetupDetailScreen.route);
-              })
+              RaisedButton(
+                  child: Text('Go to detail'),
+                  onPressed: () {
+                    Navigator.pushNamed(context, MeetupDetailScreen.route);
+                  })
             ])),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -46,7 +48,10 @@ class CounterHomeScreenState extends State<CounterHomeScreen> {
             },
             tooltip: 'Increment Text',
             child: Icon(Icons.add)),
-        bottomNavigationBar: BottomNavigation(),
+        bottomNavigationBar: BottomNavigation(
+          currentIndex: 0,
+          onChange: (int i) {},
+        ),
         appBar: AppBar(title: Text(widget._title)));
   }
 }

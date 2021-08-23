@@ -5,6 +5,7 @@ import 'package:meetuper/src/blocs/auth_bloc/auth_bloc.dart';
 import 'package:meetuper/src/blocs/bloc_provider.dart';
 import 'package:meetuper/src/blocs/meetup_bloc.dart';
 import 'package:meetuper/src/models/meetup.dart';
+import 'package:meetuper/src/screens/meetup_create_screen.dart';
 import 'package:meetuper/src/services/auth_api_service.dart';
 
 class MeetupDetailArguments {
@@ -73,8 +74,8 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () {
-            authBloc.dispatch(LoggedOut(message: 'message'));
-            Navigator.pushReplacementNamed(context, '/');
+            // authBloc.dispatch(LoggedOut(message: 'message'));
+            Navigator.pushNamed(context, MeetupCreateScreen.route);
             // _shuffleList();
           },
         ),

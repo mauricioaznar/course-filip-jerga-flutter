@@ -8,6 +8,7 @@ import 'package:meetuper/src/blocs/user_bloc/user_bloc.dart';
 import 'package:meetuper/src/models/arguments.dart';
 import 'package:meetuper/src/screens/counter_home_screen.dart';
 import 'package:meetuper/src/screens/login_screen.dart';
+import 'package:meetuper/src/screens/meetup_create_screen.dart';
 import 'package:meetuper/src/screens/meetup_detail_screen.dart';
 import 'package:meetuper/src/screens/meetup_home_screen.dart';
 import 'package:meetuper/src/screens/register_screen.dart';
@@ -124,6 +125,7 @@ class _MeetuperAppState extends State<MeetuperApp> {
               child: MeetupHomeScreen(),
             ),
         RegisterScreen.route: (context) => RegisterScreen(),
+        MeetupCreateScreen.route: (context) => MeetupCreateScreen()
       },
     );
   }

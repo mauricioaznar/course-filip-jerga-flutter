@@ -115,7 +115,10 @@ class StreamHomeScreenState extends State<StreamHomeScreen> {
             },
             tooltip: 'Increment Text',
             child: Icon(Icons.add)),
-        bottomNavigationBar: BottomNavigation(),
+        bottomNavigationBar: BottomNavigation(
+          onChange: (int i) {},
+          currentIndex: 0,
+        ),
         appBar: AppBar(title: Text(widget._title)));
   }
 }
